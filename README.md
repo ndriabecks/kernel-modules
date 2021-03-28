@@ -7,3 +7,6 @@ Hello module is a really basic module. Learned arguments:
 - Create a parameter and pass it to the module
 - Obtaining the module's PID
 - Print messages on the dmesg
+
+## oops-module
+This module generate a kernel oops and shows how to deal with it.

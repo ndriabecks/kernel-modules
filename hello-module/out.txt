@@ -1,0 +1,17 @@
+[19116.886410] Hello, AAmodule correctly loaded
+[19116.886414] [+] hello: this is a correct print
+[19116.886415] [+] hello: value = -1
+[19116.886416] [+] hello: pid = 8068
+[19215.929076] [+] hello: hello is being unloaded
+
+[19246.204328] hello: unknown parameter 'myint' ignored
+[19246.204395] Hello, AAmodule correctly loaded
+[19246.204396] [+] hello: this is a correct print
+[19246.204397] [+] hello: value = -1
+[19246.204398] [+] hello: pid = 8161
+[19253.624999] [+] hello: hello is being unloaded
+
+[19264.360468] Hello, AAmodule correctly loaded
+[19264.360472] [+] hello: this is a correct print
+[19264.360474] [+] hello: value = 1024
+[19264.360476] [+] hello: pid = 8192

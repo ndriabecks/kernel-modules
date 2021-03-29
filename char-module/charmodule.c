@@ -14,7 +14,7 @@
 #include <linux/kernel.h>       // types, macros, functions for the kernel
 #include <linux/fs.h>           // Header for the Linux file system support
 #include <linux/uaccess.h>      // Required for the copy to user function
-#include <linux/dev_prink.h>    // Printing macros
+#include <linux/dev_printk.h>    // Printing macros
 
 #define DEVICE_NAME "chrdev"    // The device will appear at /dev/ebbchar
                                 // using this value

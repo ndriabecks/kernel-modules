@@ -14,3 +14,4 @@ The module's init function attempts to dynamically obtain a major number by call
 
 ## Notes on the syntax
 1. C99 structure syntax is fancy, it allows to initialize only the important parts of the struct, leaving the rest initialized to 0. A variable is initialized just by prepending a "." to its name.
+2. 

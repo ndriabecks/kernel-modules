@@ -14,6 +14,7 @@
 #include <linux/kernel.h>       // types, macros, functions for the kernel
 #include <linux/fs.h>           // Header for the Linux file system support
 #include <linux/uaccess.h>      // Required for the copy to user function
+#include <linux/dev_prink.h>    // Printing macros
 
 #define DEVICE_NAME "chrdev"    // The device will appear at /dev/ebbchar
                                 // using this value
@@ -65,16 +66,41 @@ static int __init chrdev_init(void)
     printk( KERN_INFO MODULE_LOG "Initializing the chrdev\n");
 
     // Attempt to dynamically obtain a major number
-    majorNumber = register_chrdev(0, DEVICE_NAME, &fops);
-    // Error checking
-    if (majorNumber < 0)
-    {
-        printk(KERN_ALERT "chrdev could not register a major number");
-        return majorNumber;
+    err = register_chrdev(0, DEVICE_NAME, &fops);
+    if (err < 0) {
+        pr_err(MODULE_LOG "Failed to register a major number");
+        goto failed_majorNumber;
     }
-    printk(KERN_INFO MODULE_LOG "major number %d correctly registered\n", majorNumber);
+    majorNumber = err;
+    pr_info(MODULE_LOG "major number %d correctly registered\n", majorNumber);
 
     // Now let's register the device class
-    chrClass = class_create(THIS_MODULE, CLASS_NAME);
+    err = class_create(THIS_MODULE, CLASS_NAME);
+    if (IS_ERR(err)) {
+        pr_err(MODULE_LOG "Failed to register class\n");
+        goto failed_class:
+    }
+    chrClass = err;
+    pr_info(MODULE_LOG "class correctly registered\n");
 
+    // Device registration
+    err = device_create(chrClass, NULL, MKDEV(majorNumber, 0), NULL, \
+                        DEVICE_NAME)
+    if (IS_ERR(err)) {
+        pr_err(MODULE_LOG "Failed to create device\n");
+        goto failed_device;
+    }
+    chrDevice = err;
+    pr_info(MODULE_LOG "device correctly created\n");
+
+    return 0;
+
+
+failed_device:
+    class_destroy(chrClass);
+failed_class:
+    unregister_chrdev(majorNumber, DEVICE_NAME);
+    err = PTR_ERR(err);
+failed_majorNumber:
+    return err;
 }

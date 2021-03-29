@@ -36,15 +36,27 @@ static struct class *chrClass = NULL;
 static struct device *chrDevice = NULL;
 
 // Prototypes of the driver's functions
-static int dev_open(struct inode *inodep, struct file *filep);
+static int dev_open(struct inode *inodep, struct file *filep)
+{
+    return 0;
+}
 
-static int dev_release(struct inode *inodep, struct file *filep);
+static int dev_release(struct inode *inodep, struct file *filep)
+{
+    return 0;
+}
 
-static int dev_write(struct file *filep, char *buf, size_t buf_size,
-                     loff_t * offset);
+static ssize_t dev_write(struct file *filep, const char *buf, size_t buf_size,
+                     loff_t * offset)
+{
+    return 0;
+}
 
-static int dev_read(struct file *filep, char *buf, size_t buf_size,
-                    loff_t * offset);
+static ssize_t dev_read(struct file *filep, char *buf, size_t buf_size,
+                    loff_t * offset)
+{
+    return 0;
+}
 
 /** @brief Devices are represented as files, the file_operations struct
  * stores the functions to associate with the operations in C99 syntax.
@@ -65,6 +77,8 @@ static int __init chrdev_init(void)
 {
     printk( KERN_INFO MODULE_LOG "Initializing the chrdev\n");
 
+    int err = 0;
+
     // Attempt to dynamically obtain a major number
     err = register_chrdev(0, DEVICE_NAME, &fops);
     if (err < 0) {
@@ -75,22 +89,22 @@ static int __init chrdev_init(void)
     pr_info(MODULE_LOG "major number %d correctly registered\n", majorNumber);
 
     // Now let's register the device class
-    err = class_create(THIS_MODULE, CLASS_NAME);
-    if (IS_ERR(err)) {
+    chrClass = class_create(THIS_MODULE, CLASS_NAME);
+    if (IS_ERR(chrClass)) {
+        err = PTR_ERR(chrClass);
         pr_err(MODULE_LOG "Failed to register class\n");
-        goto failed_class:
+        goto failed_class;
     }
-    chrClass = err;
     pr_info(MODULE_LOG "class correctly registered\n");
 
     // Device registration
-    err = device_create(chrClass, NULL, MKDEV(majorNumber, 0), NULL, \
-                        DEVICE_NAME)
-    if (IS_ERR(err)) {
+    chrDevice = device_create(chrClass, NULL, MKDEV(majorNumber, 0), NULL, \
+                        DEVICE_NAME);
+    if (IS_ERR(chrDevice)) {
+        err = PTR_ERR(chrDevice);
         pr_err(MODULE_LOG "Failed to create device\n");
         goto failed_device;
     }
-    chrDevice = err;
     pr_info(MODULE_LOG "device correctly created\n");
 
     return 0;
@@ -100,7 +114,6 @@ failed_device:
     class_destroy(chrClass);
 failed_class:
     unregister_chrdev(majorNumber, DEVICE_NAME);
-    err = PTR_ERR(err);
 failed_majorNumber:
     return err;
 }

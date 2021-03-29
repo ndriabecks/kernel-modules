@@ -129,3 +129,6 @@ static void __exit chrdev_exit(void)
     unregister_chrdev(majorNumber, DEVICE_NAME);
     pr_info(MODULE_LOG "Module succesfully unloaded\n");
 }
+
+module_init(chrdev_init);
+module_exit(chrdev_exit);

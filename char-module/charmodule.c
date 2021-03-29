@@ -29,32 +29,64 @@ MODULE_DESCRIPTION("A simple Linux char driver \
 MODULE_VERSION("0.1");            
 
 static int majorNumber;             // Stores the device number
-static char buffer[BUF_SIZE] = {0}; // Contains the messages
+static char message[BUF_SIZE] = {0}; // Contains the messages
 static short msg_size;              // Counts the size of the msg in buffer
-static int opened = 0;              // Counts times that chrdev has been opened
+static int timesOpened = 0;         // Counts times that chrdev has been opened
 static struct class *chrClass = NULL;
 static struct device *chrDevice = NULL;
 
-// Prototypes of the driver's functions
+/** @brief device open function is called each time that the device
+ *  is opened. Just increases the counter and prints it to dmesg.
+ *  @param inodep A pointer to an inode (linux/fs.h)
+ *  @param filep A pointer to a file (linux/fs.h)
+ */
 static int dev_open(struct inode *inodep, struct file *filep)
 {
+    timesOpened++;
+    pr_info(MODULE_LOG "Device opened %d time(s)\n", timesOpened);
     return 0;
 }
 
+/** @brief device open function is called when the device is closed
+ *  by who opened it. In this case it just displays a message.
+ *  @param inodep A pointer to an inode (linux/fs.h)
+ *  @param filep A pointer to a file (linux/fs.h)
+ */
 static int dev_release(struct inode *inodep, struct file *filep)
 {
+    pr_info(MODULE_LOG "Device succesfully closed\n");
     return 0;
 }
 
-static ssize_t dev_write(struct file *filep, const char *buf, size_t buf_size,
-                     loff_t * offset)
+static ssize_t dev_write(struct file *filep, const char *buf, size_t buf_size, \
+                            loff_t * offset)
 {
-    return 0;
+    sprintf(message, "%s(%zu letters)", buf, buf_size);
+    msg_size = strlen(message);
+    return buf_size;
 }
 
-static ssize_t dev_read(struct file *filep, char *buf, size_t buf_size,
-                    loff_t * offset)
+/** @ brief device open function is called each time that the device
+ *  is opened. Just increases the counter and prints it to dmesg.
+ *  @param filep A pointer to a file (linux/fs.h)
+ *  @param buf Pointer to the buffer used to write data
+ *  @param buf_size The size of the buffer
+ *  @param offset The offset in the buffer, if required
+ */
+static ssize_t dev_read(struct file *filep, char *buf, size_t buf_size, \
+                        loff_t * offset)
 {
+    int errCount = 0;
+
+    errCount = copy_to_user(buf, message, msg_size);
+
+    if (errCount == 0) {
+        pr_info(MODULE_LOG "Sent %d characters\n", msg_size);
+        msg_size = 0;
+    } else {
+        pr_err(MODULE_LOG "Failed to send %d characters\n", msg_size);
+        return -EFAULT;
+    }
     return 0;
 }
 
@@ -77,7 +109,7 @@ static int __init chrdev_init(void)
 {
     printk( KERN_INFO MODULE_LOG "Initializing the chrdev\n");
 
-    int err = 0;
+    int err;
 
     // Attempt to dynamically obtain a major number
     err = register_chrdev(0, DEVICE_NAME, &fops);
@@ -110,12 +142,12 @@ static int __init chrdev_init(void)
     return 0;
 
 
-failed_device:
-    class_destroy(chrClass);
-failed_class:
-    unregister_chrdev(majorNumber, DEVICE_NAME);
-failed_majorNumber:
-    return err;
+    failed_device:
+        class_destroy(chrClass);
+    failed_class:
+        unregister_chrdev(majorNumber, DEVICE_NAME);
+    failed_majorNumber:
+        return err;
 }
 
 /* @brief The cleanup/exit function

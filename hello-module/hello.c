@@ -24,6 +24,7 @@ static int __init dummy_init(void)
     printk(KERN_INFO MODULE_LOG "this is a correct print\n");
     printk(KERN_WARNING MODULE_LOG "value = %d\n", value);
     printk(KERN_WARNING MODULE_LOG "pid = %d\n", current->pid);
+    pr_err(MODULE_LOG "Errore di prova\n");
 
     return 0;
 }

@@ -104,3 +104,15 @@ failed_class:
 failed_majorNumber:
     return err;
 }
+
+/* @brief The cleanup/exit function
+ * It is similar to the init one.
+ */
+static void __exit chrdev_exit(void)
+{
+    device_destroy(chrClass, MKDEV(majorNumber, 0));
+    class_unregister(chrClass);
+    class_destroy(chrClass);
+    unregister_chrdev(majorNumber, DEVICE_NAME);
+    pr_info(MODULE_LOG "Module succesfully unloaded\n");
+}

@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/ndriabecks/kernel-modules/badge.svg?branch=main)](https://coveralls.io/github/ndriabecks/kernel-modules?branch=main)
+
 # Kernel-modules
 Kernel-modules contains several kernel modules that can be used to study the basis of modules programming.
 
